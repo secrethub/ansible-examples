@@ -1,0 +1,30 @@
+---
+- name: load_secrets
+  hosts: localhost
+  connection: local
+  vars:
+    path:  "{{ lookup('env', 'SECRETHUB_USERNAME') }}/ansible-example/2-write"
+  vars_prompt:
+    - name: myvar
+      prompt: "Please type in a value to write to 'myvar' in SecretHub"
+      private: yes
+  tasks:
+  - set_fact: # This makes the prompted var accessible to the task definitions below
+        myvar: "{{ myvar }}"
+  - name: Write the prompted value to SecretHub
+    shell: "echo \"{{ myvar }}\" | secrethub write {{ path }}/myvar"
+  - name: Generate a random password
+    shell: "secrethub generate rand {{ path }}/password"
+  - name: Read the generated password
+    shell: "secrethub read {{ path }}/password"
+    register: password
+
+- name: Use secret variables on the host
+  hosts: localhost # We choose localhost here to avoid dependencies.
+  tasks:
+  - name: Print out the password (in real life you would use this for e.g. connecting to a database)
+    debug: 
+      msg:
+        - "myvar={{ myvar }}"
+        - "password={{ password.stdout }}"
+  

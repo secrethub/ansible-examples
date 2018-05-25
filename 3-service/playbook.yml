@@ -1,0 +1,48 @@
+---
+- name: load_secrets
+  hosts: localhost
+  connection: local
+  vars:
+    # Construct the repository path from the environment.
+    path: "{{ lookup('env', 'SECRETHUB_USERNAME') }}/ansible-example/3-service"
+  tasks:
+  - name: Generate a random password
+    shell: "secrethub generate rand {{ path }}/password"
+  - name: Create a service account and give it read permission on the directory (may take a minute)
+    shell: "secrethub service init {{ path }} --permission read"
+    register: service_credential
+
+- name: Deploy secrets to host
+  hosts: localhost # We choose localhost here to avoid dependencies.
+  vars:
+    # Construct the repository path from the environment.
+    path: "{{ lookup('env', 'SECRETHUB_USERNAME') }}/ansible-example/3-service"
+    config_dir: "/tmp/ansible-example/3-service/.secrethub"
+  tasks:
+  - name: Create a directory for this example
+    file:
+      path: "{{ config_dir }}"
+      state: directory
+      recurse: yes
+  - name: "Write the service account credential to a file"
+    copy: 
+      dest: "{{ config_dir }}/credential"
+      content: "{{ service_credential.stdout }}"
+  - name: "Let the service account read the secret and write it to a file"
+    environment:
+      SECRETHUB_CONFIG_DIR: "{{ config_dir }}"
+    shell: "secrethub read {{ path }}/password"
+    register: password
+  - name: Print out the password the service account has read
+    debug: 
+      msg:
+        - "password={{ password.stdout }}"
+  - name: "Grab the first two lines and last line of the audit log"
+    shell: "secrethub audit {{ path }}/password | (head -n2 && tail -n1)"
+    register: audit_log
+  - name: Print out the the audit log showing the service read the secret
+    debug: 
+      msg:
+        - "{{ audit_log.stdout.splitlines() }}"
+  
+  
