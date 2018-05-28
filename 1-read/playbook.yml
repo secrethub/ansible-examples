@@ -1,22 +1,22 @@
 ---
-- name: load_secrets
+- name: Load secrets from SecretHub
   hosts: localhost
   connection: local
   vars:
     # Construct the repository path from the environment.
-    repo:  "{{ lookup('env', 'SECRETHUB_USERNAME') }}/ansible-example"
+    path:  "{{ lookup('env', 'SECRETHUB_USERNAME') }}/ansible-examples/1-read"
   tasks:
   - name: Load db_password secret into variable
-    shell: "secrethub read {{repo}}/1-read/db_password"
+    command: "secrethub read {{ path }}/db_password"
     register: db_password
   - name: Load db_user secret into a variable
-    shell: "secrethub read {{repo}}/1-read/db_user"
+    command: "secrethub read {{ path }}/db_user"
     register: db_user
 
 - name: Deploy secrets to host
   hosts: localhost # We choose localhost here to avoid dependencies.
   tasks:
-  - name: Print out the password (in real life you would use this for e.g. connecting to a database)
+  - name: Print out the secrets (in real life you would use this for e.g. connecting to a database)
     debug: 
       msg:
         - "db_user={{ db_user.stdout }}"

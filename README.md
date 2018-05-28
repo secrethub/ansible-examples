@@ -1,5 +1,9 @@
+# How to inject secrets into Ansible playbooks with SecretHub
 
 
-```
-export SECRETHUB_USERNAME="<insert your username here>"
-```
+This is the code repository of an integration guide for [SecretHub](https://secrethub.io). 
+
+You can find the [integration guide here](https://secrethub.io/blog/ansible-integration).
+
+> All software needs secrets to access other resources: database passwords, API tokens, encryption keys.
+> SecretHub helps teams ship safe code faster with a secure, automatic and reproducible secret deployment process.
