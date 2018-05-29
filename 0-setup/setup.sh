@@ -12,9 +12,6 @@ fi
 
 echo "Setting up an ansible-examples repository, this can take a few seconds..."
 
-# This ensures we don't get prompted for the passphrase each time. 
-export SECRETHUB_CREDENTIAL_PASSPHRASE_CACHE_TTL="30s"
-
 secrethub repo init ${SECRETHUB_USERNAME}/ansible-examples > /dev/null
 secrethub mkdir ${SECRETHUB_USERNAME}/ansible-examples/1-read > /dev/null
 secrethub mkdir ${SECRETHUB_USERNAME}/ansible-examples/2-write > /dev/null
